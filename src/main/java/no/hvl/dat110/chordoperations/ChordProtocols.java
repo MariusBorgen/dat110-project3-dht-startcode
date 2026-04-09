@@ -6,9 +6,11 @@ package no.hvl.dat110.chordoperations;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 
+import no.hvl.dat110.util.Hash;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -150,30 +152,42 @@ public class ChordProtocols {
 		
 		logger.info("Update of successor and predecessor completed...bye!");
 	}
-	
 	public void fixFingerTable() {
-		
+
 		try {
-			logger.info("Fixing the FingerTable for the Node: "+ chordnode.getNodeName());
-	
-			// get the finger table from the chordnode (list object)
-			
-			// ensure to clear the current finger table
-			
-			// get the address size from the Hash class. This is the modulus and our address space (2^mbit = modulus)
-			
-			// get the number of bits from the Hash class. Number of bits = size of the finger table
-			
-			// iterate over the number of bits			
-			
-			// compute: k = succ(n + 2^(i)) mod 2^mbit
-			
-			// then: use chordnode to find the successor of k. (i.e., succnode = chordnode.findSuccessor(k))
-			
-			// check that succnode is not null, then add it to the finger table
+			logger.info("Fixing the FingerTable for the Node: " + chordnode.getNodeName());
+
+			// 1. hent finger table
+			List<NodeInterface> fingerTable = chordnode.getFingerTable();
+
+			// 2. tøm den
+			fingerTable.clear();
+
+			// 3. hent node ID
+			BigInteger n = chordnode.getNodeID();
+
+			// 4. hent m og modulus
+			int m = Hash.bitSize();
+			BigInteger mod = Hash.addressSize();
+
+			// 5. loop gjennom bits
+			for (int i = 0; i < m; i++) {
+
+				// n + 2^i
+				BigInteger twoPower = BigInteger.valueOf(2).pow(i);
+				BigInteger k = n.add(twoPower).mod(mod);
+
+				// finn successor
+				NodeInterface succ = chordnode.findSuccessor(k);
+
+				// legg til hvis ikke null
+				if (succ != null) {
+					fingerTable.add(succ);
+				}
+			}
 
 		} catch (RemoteException e) {
-			//
+			e.printStackTrace();
 		}
 	}
 
